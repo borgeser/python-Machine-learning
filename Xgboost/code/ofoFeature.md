@@ -26,7 +26,7 @@ import os
 
 #源数据路径
 DataPath = '../Data/data_origin'
-
+ExportPath = '../Data/data_preprocessed'
 
 
 off_train = pd.read_csv(os.path.join(DataPath,'ccf_offline_stage1_train.csv'),header=0,keep_default_na=False)
@@ -475,9 +475,6 @@ def DataProcess(dataset,feature,TrainFlag):
         dataset['date'] = dataset['date'].fillna('null');
         dataset['label'] = dataset.date.astype('str') + ':' +  dataset.date_received.astype('str')
         dataset.label = dataset.label.apply(get_label)
-        dataset.drop(['merchant_id','day_of_week','date','date_received','coupon_count'],axis=1,inplace=True)
-    else:
-        dataset.drop(['merchant_id','day_of_week','coupon_count'],axis=1,inplace=True)
     dataset = dataset.replace('null',np.nan)
     return dataset
 ```
@@ -488,13 +485,13 @@ def DataProcess(dataset,feature,TrainFlag):
 
 ```python
 ProcessDataSet1 = DataProcess(dataset1,feature1,True)
-ProcessDataSet1.to_csv(os.path.join(DataPath,'ProcessDataSet1.csv'),index=None)
+ProcessDataSet1.to_csv(os.path.join(ExportPath,'ProcessDataSet1.csv'),index=None)
 print('---------------ProcessDataSet1 done-------------------')
 ProcessDataSet2 = DataProcess(dataset2,feature2,True)
-ProcessDataSet2.to_csv(os.path.join(DataPath,'ProcessDataSet2.csv'),index=None)
+ProcessDataSet2.to_csv(os.path.join(ExportPath,'ProcessDataSet2.csv'),index=None)
 print('---------------ProcessDataSet2 done-------------------')
 ProcessDataSet3 = DataProcess(dataset3,feature3,False)
-ProcessDataSet3.to_csv(os.path.join(DataPath,'ProcessDataSet3.csv'),index=None)
+ProcessDataSet3.to_csv(os.path.join(ExportPath,'ProcessDataSet3.csv'),index=None)
 print('---------------ProcessDataSet3 done-------------------')
 ```
 
