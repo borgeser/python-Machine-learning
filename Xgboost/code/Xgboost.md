@@ -28,21 +28,30 @@ ModelsPath = '../Data/models'
 PredictionsPath = '../Data/predictions'
 ResultsPath = '../Data/results'
 
-dataset1 = pd.read_csv(f'{PreprocessedPath}/ProcessDataSet1.csv')
-dataset1.label.replace(-1,0,inplace=True) 
-dataset2 = pd.read_csv(f'{PreprocessedPath}/ProcessDataSet2.csv')
+preprocessed1 = pd.read_csv(f'{PreprocessedPath}/ProcessDataSet1.csv')
+dataset1 = preprocessed1.copy()
+dataset1.label.replace(-1,0,inplace=True)
+
+preprocessed2 = pd.read_csv(f'{PreprocessedPath}/ProcessDataSet2.csv')
+dataset2 = preprocessed2.copy()
 dataset2.label.replace(-1,0,inplace=True)
-dataset3 = pd.read_csv(f'{PreprocessedPath}/ProcessDataSet3.csv')
+
+preprocessed3 = pd.read_csv(f'{PreprocessedPath}/ProcessDataSet3.csv')
+dataset3 = preprocessed3.copy()
+
+columns_to_drop = ['merchant_id','day_of_week','date_received','coupon_count', 'user_id', 'day_gap_before','coupon_id','day_gap_after']
 
 dataset1.drop_duplicates(inplace=True)
 dataset2.drop_duplicates(inplace=True)
+dataset3.drop_duplicates(inplace=True)
+
 dataset12 = pd.concat([dataset1,dataset2],axis=0)
 dataset12_y = dataset12.label
-dataset12_x = dataset12.drop(['user_id','label','day_gap_before','coupon_id','day_gap_after'],axis=1)      
-                                         
-dataset3.drop_duplicates(inplace=True)                       
+dataset12_x = dataset12.drop(columns_to_drop,axis=1) \
+                       .drop(["date", "label"],axis=1)
+
 dataset3_preds = dataset3[['user_id','coupon_id','date_received']]
-dataset3_x = dataset3.drop(['user_id','coupon_id','date_received','day_gap_before','day_gap_after'],axis=1)
+dataset3_x = dataset3.drop(columns_to_drop,axis=1)
 
 dataTrain = xgb.DMatrix(dataset12_x,label=dataset12_y)
 dataTest = xgb.DMatrix(dataset3_x)
@@ -92,7 +101,7 @@ dataset3_preds1['label'] = model.predict(dataTest)
 #标签归一化在[0，1]原作者代码这里有错
 #修改前
 #dataset3_preds.label = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds.label)
- 
+
 #修改后
 dataset3_preds1.label = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds1.label.values.reshape(-1,1))
 dataset3_preds1.sort_values(by=['coupon_id','label'],inplace=True)
@@ -149,7 +158,6 @@ temp = dataset12[['coupon_id','label']].copy()
 temp['pred'] =model1.predict(xgb.DMatrix(dataset12_x))
 temp.pred = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(temp['pred'].values.reshape(-1,1))
 print(myauc(temp))
-
 ```
 
 ```python
@@ -223,13 +231,8 @@ resultat
 import os
 from datetime import date, datetime
 def exportResults(df, date):
-    results_path_str = "results"
-    filename = f"⁨results_{date.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-    
-    currentdir = os.getcwd()
-    results_path = os.path.join(currentdir, results_path_str)
-    full_path = os.path.join(results_path, filename)
-    
+    filename = f"⁨results_{date.strftime('%Y-%m-%d_%H-%M-%S')}"
+    full_path = f'{ResultsPath}/{filename}.csv'    
     file = df[['User_id', 'Coupon_id', 'Date_received', 'Label']]
     file.to_csv(full_path, index = None, header=False)
 ```
