@@ -206,6 +206,15 @@ resultat
 ```
 
 ```python
+def clamp(value, minimum, maximum):
+    return max(min(value, maximum), minimum)
+
+res2 = resultat.copy()
+res2.Label = res2.Label.apply(lambda x: clamp(x, 0.05, 0.95))
+res2
+```
+
+```python
 import os
 from datetime import date, datetime
 def exportResults(df, date):
@@ -216,7 +225,7 @@ def exportResults(df, date):
 ```
 
 ```python
-exportResults(resultat, datetime.now())
+exportResults(res2, datetime.now())
 ```
 
 ```python
