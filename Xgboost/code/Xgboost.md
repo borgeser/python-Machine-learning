@@ -87,10 +87,10 @@ params={'booster':'gbtree',
 	    'eta': 0.01,
 	    'tree_method':'exact',
 	    'seed':0,
-	    'nthread':12
+	    'nthread':4
 	    }
 watchlist = [(dataTrain,'train')]
-model = xgb.train(params,dataTrain,num_boost_round=1000,evals=watchlist)
+model = xgb.train(params,dataTrain,num_boost_round=3500,evals=watchlist)
 
 model.save_model(f'{ModelsPath}/xgbmodel')
 model=xgb.Booster(params)
@@ -129,7 +129,7 @@ params={'booster':'gbtree',
 	    'nthread':12
 	    }
 
-cvresult = xgb.cv(params, dataTrain, num_boost_round=1000, nfold=5, metrics='auc', seed=0, callbacks=[
+cvresult = xgb.cv(params, dataTrain, num_boost_round=10000, nfold=5, metrics='auc', seed=0, callbacks=[
             xgb.callback.print_evaluation(show_stdv=False),
             xgb.callback.early_stop(50)
         ])
