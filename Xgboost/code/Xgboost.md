@@ -75,7 +75,7 @@ dataset3
 
 ```python
 params={'booster':'gbtree',
-	    'objective': 'rank:pairwise',
+	    'objective': 'binary:logistic',
 	    'eval_metric':'auc',
 	    'gamma':0.1,
 	    'min_child_weight':1.1,
@@ -98,12 +98,6 @@ model.load_model(f'{ModelsPath}/xgbmodel')
 #predict test set 
 dataset3_preds1 = dataset3_preds
 dataset3_preds1['label'] = model.predict(dataTest)
-#标签归一化在[0，1]原作者代码这里有错
-#修改前
-#dataset3_preds.label = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds.label)
-
-#修改后
-dataset3_preds1.label = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds1.label.values.reshape(-1,1))
 dataset3_preds1.sort_values(by=['coupon_id','label'],inplace=True)
 dataset3_preds1.to_csv(f"{PredictionsPath}/xgb_preds.csv",index=None,header=None)
 print(dataset3_preds1.describe())
@@ -115,13 +109,12 @@ model.load_model(f'{ModelsPath}/xgbmodel')
 
 temp = dataset12[['coupon_id','label']].copy()
 temp['pred'] =model.predict(xgb.DMatrix(dataset12_x))
-temp.pred = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(temp['pred'].values.reshape(-1,1))
 print(myauc(temp))
 ```
 
 ```python
 params={'booster':'gbtree',
-	    'objective': 'rank:pairwise',
+	    'objective': 'binary:logistic',
 	    'eval_metric':'auc',
 	    'gamma':0.1,
 	    'min_child_weight':1.1,
@@ -156,32 +149,13 @@ model1.load_model(f'{ModelsPath}/xgbmodel1')
 
 temp = dataset12[['coupon_id','label']].copy()
 temp['pred'] =model1.predict(xgb.DMatrix(dataset12_x))
-temp.pred = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(temp['pred'].values.reshape(-1,1))
 print(myauc(temp))
 ```
 
 ```python
-dataset3_preds2 = dataset3_preds
-dataset3_preds2['label'] = model1.predict(dataTest)
-dataset3_preds2.label = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds2.label.values.reshape(-1,1))
-dataset3_preds2.sort_values(by=['coupon_id','label'],inplace=True)
-dataset3_preds2.to_csv(f"{PredictionsPath}/xgb_preds2.csv",index=None,header=None)
-print(dataset3_preds2.describe())
-```
-
-```python
-dataset3_preds3 = dataset3
-dataset3_preds3['label_unbounded'] = model1.predict(dataTest)
-dataset3_preds3["min_max_label"] = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds3.label_unbounded.values.reshape(-1,1))
+dataset3_preds3 = dataset3.copy()
+dataset3_preds3['label'] = model1.predict(dataTest)
 dataset3_preds3.to_csv(f"{PredictionsPath}/xgb_preds2_not_sorted.csv",index=None,header=True)
-dataset3_preds3
-```
-
-```python
-def clamp(value, minimum, maximum):
-    return max(min(value, maximum), minimum)
-
-dataset3_preds3["label"] = dataset3_preds3["label_unbounded"].apply(lambda x: clamp(x, 0, 1))
 dataset3_preds3
 ```
 
