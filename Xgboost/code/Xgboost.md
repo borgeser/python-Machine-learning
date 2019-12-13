@@ -171,10 +171,18 @@ print(dataset3_preds2.describe())
 
 ```python
 dataset3_preds3 = dataset3
-dataset3_preds3['label'] = model1.predict(dataTest)
-dataset3_preds3.label = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds3.label.values.reshape(-1,1))
+dataset3_preds3['label_unbounded'] = model1.predict(dataTest)
+dataset3_preds3["min_max_label"] = MinMaxScaler(copy=True,feature_range=(0,1)).fit_transform(dataset3_preds3.label_unbounded.values.reshape(-1,1))
 dataset3_preds3.to_csv(f"{PredictionsPath}/xgb_preds2_not_sorted.csv",index=None,header=True)
-print(dataset3_preds3.describe())
+dataset3_preds3
+```
+
+```python
+def clamp(value, minimum, maximum):
+    return max(min(value, maximum), minimum)
+
+dataset3_preds3["label"] = dataset3_preds3["label_unbounded"].apply(lambda x: clamp(x, 0, 1))
+dataset3_preds3
 ```
 
 ```python
@@ -209,10 +217,6 @@ for (key,value) in feature_score:
 with open(f'{PredictionsPath}/xgb_feature_score.csv','w') as f:
     f.writelines("feature,score\n")
     f.writelines(fs)
-```
-
-```python
-dataset3_preds3_corr[dataset3_preds3_corr.User_id == 5712798]
 ```
 
 ```python
