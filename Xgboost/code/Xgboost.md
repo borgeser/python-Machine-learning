@@ -209,9 +209,16 @@ resultat
 def clamp(value, minimum, maximum):
     return max(min(value, maximum), minimum)
 
-res2 = resultat.copy()
-res2.Label = res2.Label.apply(lambda x: clamp(x, 0.05, 0.95))
-res2
+def more_confidence(value, low_thres, high_thres):
+    if value < low_thres:
+        return 0
+    if value > high_thres:
+        return 1
+    return value
+
+res3 = resultat.copy()
+res3.Label = res3.Label.apply(lambda x: more_confidence(x, 0.05, 0.95))
+res3
 ```
 
 ```python
@@ -225,7 +232,7 @@ def exportResults(df, date):
 ```
 
 ```python
-exportResults(res2, datetime.now())
+exportResults(res3, datetime.now())
 ```
 
 ```python
